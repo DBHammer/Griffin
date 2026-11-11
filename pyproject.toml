@@ -1,0 +1,31 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "griffin"
+version = "0.1.0"
+description = "Griffin: customizable attribute-vector data and query workload generation for filtered ANNS benchmarking (ICDE artifact)"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "faiss-cpu>=1.9",
+    "msgspec>=0.18",
+    "numpy>=2.0",
+    "ortools>=9.10",
+    "pandas>=2.2",
+    "pyarrow>=16",
+    "pyyaml>=6.0",
+    "scikit-learn>=1.4",
+    "scipy>=1.11",
+]
+
+[project.scripts]
+griffin = "griffin.adapters.cli:main"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["griffin*"]

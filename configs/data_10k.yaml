@@ -1,0 +1,60 @@
+# Griffin data generation example (10K rows, 96-d vectors, 24 vector regions).
+# The same schema is used in the paper; increase `rows`, `dim`, `cluster_count`,
+# and `region_count` to scale up to the paper settings (N=1M, d=192, R=32).
+type: data
+data_model: relational
+seed: 7401
+output_dir: outputs/data_10k
+output_format: parquet
+dialect: postgresql
+
+spec:
+  tables:
+    - name: events
+      rows: 10000
+      columns:
+        - name: id
+          type: int
+          primary_key: true
+
+        - name: tenant_id
+          type: int
+          distribution:
+            type: categorical
+            values: ["1", "2", "3", "4", "5"]
+            weights: [0.30, 0.24, 0.20, 0.16, 0.10]
+
+        - name: category
+          type: text
+          distribution:
+            type: categorical
+            values: ["search", "recommend", "payment", "profile", "support"]
+            weights: [0.28, 0.24, 0.20, 0.16, 0.12]
+
+        - name: latency_ms
+          type: double
+          distribution:
+            type: lognormal
+            mean: 4.2
+            sigma: 0.7
+
+        - name: embedding
+          type: vector
+          vector_spec:
+            dim: 96
+            metric: cosine
+            normalize: l2
+            cluster_count: 12
+            cluster_size_distribution: zipf_0_5
+            cluster_separation: 1.35
+            cluster_spread: 0.70
+            vector_length_variation: medium
+            region_count: 24
+
+      # Attribute-vector dependency target (Sec. 4.2 of the paper):
+      # rho = 0.55 for the categorical attribute `category`.
+      vector_attribute_couplings:
+        - name: embedding_category
+          vector: embedding
+          attribute: category
+          target_rho: 0.55

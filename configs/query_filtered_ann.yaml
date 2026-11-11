@@ -1,0 +1,34 @@
+# Griffin filtered-ANN query workload example (Sec. 5 of the paper).
+# Runs on the dataset produced by configs/data_10k.yaml; no external DBMS is needed.
+type: query
+seed: 7411
+input_dir: outputs/data_10k
+output_dir: outputs/query_filtered_ann
+
+spec:
+  family: filtered_ann
+  count: 5
+  target_tables: [events]
+
+  form:
+    kind: filtered_ann
+    difficulty: medium
+    predicate_count:
+      min: 1
+      max: 2
+    operators: [eq, in, between]
+    predicate_fields: [tenant_id, category, latency_ms]
+
+  # Global selectivity target; GLS (query-filter correlation) is controlled by
+  # the search budget below and reported per query in run.json.
+  constraints:
+    - metric: selectivity
+      min: 0.10
+      max: 0.25
+
+  output:
+    kind: top_k
+    top_k: 10
+
+  search:
+    max_attempts_per_query: 80
